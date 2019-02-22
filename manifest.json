@@ -3,7 +3,7 @@
     "short_name": "Alert Web",
     "icons": [
         {
-            "src": "android_nico_alert.png",
+            "src": "android_nico_alert_icon.png",
             "sizes": "512x512",
             "type": "image/png"
         }
