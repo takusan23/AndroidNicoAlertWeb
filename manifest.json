@@ -1,6 +1,7 @@
 {
     "name": "AndroidNicoAlert WebClient",
     "short_name": "Alert Web",
+    "start_url": "index.html",
     "icons": [
         {
             "src": "android_nico_alert_icon.png",
@@ -8,6 +9,5 @@
             "type": "image/png"
         }
     ],
-    "start_url": "index.html",
     "display": "standalone"
 }
