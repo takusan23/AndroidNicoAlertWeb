@@ -5,7 +5,7 @@
     "icons": [
         {
             "src": "android_nico_alert_icon.png",
-            "sizes": "512x512",
+            "sizes": "144x144",
             "type": "image/png"
         }
     ],
