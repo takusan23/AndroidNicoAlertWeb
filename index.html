@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="jp">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AndroidNicoAlert WebClient</title>
+    <!--Import Google Icon Font　これ httpsにすると動く-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+    <!-- スマホでも扱いやすく、ダブルタップのズーム禁止 -->
+    <meta name="viewport" content="width=device-width" ,user-scalable=no">
+
+</head>
+
+<body>
+    <!-- マテリアルデザインのやつ -->
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+    <!-- Title -->
+
+    <div class="center">
+        <font id="text" size="6" class="center">AndroidNicoAlert WebClient</font>
+    </div>
+    <br>
+    <!-- 横並べ -->
+    <div class="center-block" style="width: 90%; display: flex;">
+        <!-- インスタンス名 -->
+        <div class="input-field col s6" style="width: 100%;" onkeypress="enterLogin()">
+            <input id="instance_text" type="text" class="validate">
+            <label for="last_name">インスタンス名</label>
+        </div>
+        <!-- アクセストークンが -->
+        <div class="input-field col s6" style="width: 100%;" onkeypress="enterLogin()">
+            <input id="access_token_text" type="text" class="validate">
+            <label for="last_name">アクセストークン</label>
+        </div>
+    </div>
+    <div class="center-block" style="width: 90%; display: flex;height: auto; ">
+        <!-- ボタン -->
+        <a class="waves-effect waves-light btn" style="width: 50%;" id="login_button" onclick="login()"><i
+                class="material-icons left">refresh</i>読み込み</a>
+        <a class="waves-effect waves-light btn" style="width: 50%;" id="delete_button" onclick="deleteLocalStorage()"><i
+                class="material-icons left">flash_on</i>ストリーミングAPIを利用</a>
+        <a class="waves-effect waves-light btn" style="width: 50%;" id="delete_button" onclick="deleteLocalStorage()"><i
+                class="material-icons left">delete</i>ログイン情報を消去</a>
+    </div>
+
+    <!-- 横並べ解除 -->
+    <div class="center-block" style="clear: both; width: 90%;height: auto;">
+        <p> 次回以降読み込みボタンを押すだけでログインできます</p>
+        <ul class="collection">
+            <li class="collection-header">
+                <h4>通知リスト</h4>
+            </li>
+            <div id="notification_list"></div>
+        </ul>
+    </div>
+
+
+
+
+</body>
+
+<!-- JSだあああああああああああああああああああああ -->
+<script language="javascript" type="text/javascript">
+    // ログイン
+    function login() {
+        //通知リストを消去
+        document.getElementById("notification_list").innerHTML = "";
+        //localStorageに保存しているか確認
+        //してなかったらテキストボックスから持ってくる
+        var instance = "null";
+        var access_token = "null";
+        if (localStorage.getItem('instance') == null && localStorage.getItem('access_token') == null) {
+            //インスタンスとアクセストークン持ってくる
+            instance = document.getElementById("instance_text").value;
+            access_token = document.getElementById("access_token_text").value;
+            //localStorageにそれぞれ保存
+            localStorage.setItem('instance', instance);
+            localStorage.setItem('access_token', access_token);
+        } else {
+            //localStorageから取り出す
+            instance = localStorage.getItem('instance');
+            access_token = localStorage.getItem('access_token');
+        }
+        const request = new XMLHttpRequest();
+        request.open("GET", "https://" + instance + "/api/v1/timelines/direct?limit=40&access_token=" + access_token);
+        // コールバック
+        request.addEventListener("load", (event) => {
+            //200
+            if (event.target.status == 200) {
+                //JSON Parse
+                var responseText = event.target.responseText;
+                var array = JSON.parse(responseText);
+                for (var i = 0; i < array.length; i++) {
+                    //statusを持ってくる
+                    var object = array[i];
+                    //今までの内容を持ってくる
+                    var addText = document.getElementById("notification_list").innerHTML;
+                    //AndroidNicoAlrt contentを入れる
+                    //その他の返信を無視する（Applicationで分けようと思ったけどインスタンス違うとnullになる）
+                    if (object.content.indexOf('AndroidNicoAlert') != -1) {
+                        //HTML動的生成？
+                        document.getElementById("notification_list").innerHTML = addText + '<li class="collection - item">' + object.content + '</li>';
+
+                    }
+                }
+            } else {
+                alert("インスタンス名、アクセストークンを確認してみてね");
+            }
+        });
+        request.send();
+    }
+
+    //localStorage削除
+    function deleteLocalStorage() {
+        localStorage.removeItem("instance");
+        localStorage.removeItem("access_token");
+    }
+
+    //Enter Key
+    function enterLogin() {
+        if (window.event.keyCode == 13) {
+            login();
+        }
+    }
+
+</script>
+
+</html>
