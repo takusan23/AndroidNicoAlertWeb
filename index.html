@@ -2,6 +2,18 @@
 <html lang="jp">
 
 <head>
+    <!-- HTML アイコンせってい -->
+    <link rel="shortcut icon"
+        href="https://raw.githubusercontent.com/takusan23/AndroidNicoAlertWeb/android_nico_alert_icon.png">
+
+    <!-- iPhone Statusber Color -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="white">
+    <!-- iPhone PWA ICON -->
+    <link rel="apple-touch-icon-precomposed"
+        href="https://raw.githubusercontent.com/takusan23/AndroidNicoAlertWeb/android_nico_alert_icon.png" />
+
+    <link rel="manifest" href="manifest.json">
+
     <meta charset="UTF-8">
     <title>AndroidNicoAlert WebClient</title>
     <!--Import Google Icon Font　これ httpsにすると動く-->
@@ -19,6 +31,22 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
     <!-- Title -->
+
+    <!-- なんかPWAインストールバナー表示？ -->
+    <script>
+        window.addEventListener('load', function () {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register("/serviceWorker.js")
+                    .then(function (registration) {
+                        console.log("serviceWorker registed.");
+                    }).catch(function (error) {
+                        console.warn("serviceWorker error.", error);
+                    });
+            }
+        });
+
+    </script>
+
 
     <div class="center">
         <font id="text" size="6" class="center">AndroidNicoAlert WebClient</font>
