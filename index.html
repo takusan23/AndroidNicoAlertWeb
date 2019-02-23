@@ -29,7 +29,6 @@
     <!--Import jQuery before materialize.js-->
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
-    <!-- Title -->
 
     <!-- なんかPWAインストールバナー表示？ -->
     <script>
@@ -55,23 +54,16 @@
         else {
             // 許可を求める
             Notification.requestPermission(function (result) {
-                if (result === 'denied') {
-                    alert('通知は利用できません');
-                } else if (result === 'default') {
-                    alert('不明です');
-                } else if (result === 'granted') {
-                    alert('通知は利用可能です');
-                }
             })
         }
     </script>
 
 
 
-    <p class="center">AndroidNicoAlert WebClient</p>
+    <p class="center" id="title_text">AndroidNicoAlert WebClient</p>
 
     <!-- 横並べ -->
-    <div class="center-block" style="width: 90%; display: flex;">
+    <div class="center-block" style="width: 90%; display: flex;" id="div_textbox">
         <!-- インスタンス名 -->
         <div class="input-field col s6" style="width: 100%;" onkeypress="enterLogin()">
             <input id="instance_text" type="text" class="validate">
@@ -83,19 +75,23 @@
             <label for="last_name">アクセストークン</label>
         </div>
     </div>
-    <div class="center-block" style="width: 90%; display: flex;height: auto; ">
+    <!-- 次回以降～ -->
+    <p id="next_text" class="center-block" style="clear: both; width: 90%;height: auto;"> 次回以降読み込みボタンを押すだけでログインできます</p>
+
+
+    <div class="center-block" style="width: 90%; display: flex;height: auto;">
         <!-- ボタン -->
-        <a class="waves-effect waves-light btn" style="width: 50%;" id="login_button" onclick="login(null)"><i
-                class="material-icons left">refresh</i>読み込み</a>
-        <a class="waves-effect waves-light btn" style="width: 50%;" id="streaming_api_button"
-            onclick="streaming_api_menu()"><i class="material-icons left">flash_on</i>リアルタイム更新を利用</a>
-        <a class="waves-effect waves-light btn" style="width: 50%;" id="delete_button" onclick="deleteLocalStorage()"><i
-                class="material-icons left">delete</i>ログイン情報を消去</a>
+        <a class="waves-effect waves-light btn" id="login_button" onclick="login(null)"><i
+                class="material-icons">refresh</i></a>
+        <a class="waves-effect waves-light btn" id="streaming_api_button" onclick="streaming_api_menu()"><i
+                class="material-icons">flash_on</i></a>
+        <a class="waves-effect waves-light btn" id="setting_button" href="setting.html"><i
+                class="material-icons">settings</i></a>
+
     </div>
 
     <!-- 横並べ解除 -->
     <div class="center-block" style="clear: both; width: 90%;height: auto;">
-        <p> 次回以降読み込みボタンを押すだけでログインできます</p>
         <ul class="collection">
             <li class="collection-header">
                 <p>通知リスト</p>
@@ -103,6 +99,29 @@
             <div id="notification_list"></div>
         </ul>
     </div>
+
+    <!-- サイトが読み込まれたときに動く -->
+    <script>
+        window.onload = function () {
+            // TextBoxを消す
+            if (localStorage.getItem('textbox_disable') == 1) {
+                document.getElementById('div_textbox').innerHTML = "";
+                document.getElementById('next_text').innerHTML = "";
+            }
+            //タイトルを消す
+            if (localStorage.getItem('title_disable') == 1) {
+                document.getElementById('title_text').innerHTML = "";
+            }
+            //すぐに読み込む Streaming API無効
+            if (localStorage.getItem('start_load') == 1 && localStorage.getItem("start_load_streaming") == 0) {
+                login(null);
+            }
+            //すぐに読み込む Streaming API有効
+            else if (localStorage.getItem('start_load') == 1 && localStorage.getItem("start_load_streaming") == 1) {
+                streaming_api();
+            }
+        };
+    </script>
 
 
 
@@ -212,7 +231,7 @@
         //通信が接続された場合
         websoket.onopen = function (e) {
             //接続中
-            document.getElementById("streaming_api_button").innerHTML = '<i class="material-icons left">sync</i>リアルタイム更新を利用中</a>';
+            document.getElementById("streaming_api_button").innerHTML = '<i class="material-icons">sync</i></a>';
         };
 
         //エラーが発生した場合
@@ -241,7 +260,14 @@
                 //HTML動的生成？
                 document.getElementById("notification_list").innerHTML = '<li class="collection - item">' + content + created_at + '</li>' + addText;
                 //通知が利用できたら通知を出す
-                notification_api(content.replace(/<("[^"]*"|'[^']*'|[^'">])*>/g, ''));
+                //HTMLタグを消す
+                var content_noHtml = content.replace(/<("[^"]*"|'[^']*'|[^'">])*>/g, '');
+                //ついでに「AndroidNicoAlert」のぶんも消す（通知のtitleにもう書いてある）
+                var content_notification = content_noHtml.replace("AndroidNicoAlert / ", "");
+                //通知出す
+                new Notification("AndroidNicoAlert", {
+                    body: content_noHtml,
+                });
             }
             //max_id
             //追加読み込み
@@ -255,7 +281,7 @@
         //通信が切断された場合
         websoket.onclose = function () {
             alert("通信が切断されました。");
-            document.getElementById("streaming_api_button").innerHTML = '<i class="material-icons left">flash_on</i>リアルタイム更新を利用</a>';
+            document.getElementById("streaming_api_button").innerHTML = '<i class="material-icons">flash_on</i></a>';
         };
     }
 
@@ -280,10 +306,11 @@
         }
     }
 
-    //Notification APIでお知らせできるようにする？
-    function notification_api(message) {
-        var notification = new Notification(message);
+
+    function test() {
+        alert("うごいた？")
     }
+
 
 </script>
 

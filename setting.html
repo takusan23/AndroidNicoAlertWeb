@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- HTML アイコンせってい -->
+    <link rel="shortcut icon" href="https://takusan23.github.io/AndroidNicoAlertWeb/android_nico_alert_icon.png">
+
+    <!-- iPhone Statusber Color -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="white">
+    <!-- iPhone PWA ICON -->
+    <link rel="apple-touch-icon-precomposed"
+        href="https://takusan23.github.io/AndroidNicoAlertWeb/android_nico_alert_icon.png" />
+
+    <!--Import Google Icon Font　これ httpsにすると動く-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+    <!-- スマホでも扱いやすく、ダブルタップのズーム禁止 -->
+    <meta name="viewport" content="width=device-width" ,user-scalable=no">
+
+    <title>設定</title>
+</head>
+
+<body>
+
+    <!-- マテリアルデザインのやつ -->
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+
+    <!-- Switch -->
+    <div class="center">設定</div>
+    <br>
+
+    <!-- 設定項目 -->
+    <div class="center-block" style="width: 90%;height: auto;">
+        <ul class="collection">
+            <div id="notification_list">
+                <!-- タイトルを消す -->
+                <li class="collection-item">
+                    <div class="switch">
+                        タイトルを消す
+                        <a href="#!" class="secondary-content"><label>
+                                <input type="checkbox" id="title_disable"
+                                    onclick='setCheckBox("title_disable","title_disable")'>
+                                <span class="lever"></span>
+                            </label></a>
+                    </div>
+                </li>
+
+                <!-- アクセストークンのTextBox消す？ -->
+                <li class="collection-item">
+                    <div class="switch">
+                        インスタンス名、アクセストークンの欄を消す
+                        <a href="#!" class="secondary-content"><label>
+                                <input type="checkbox" id="instance_textbox_disable"
+                                    onclick='setCheckBox("instance_textbox_disable","textbox_disable")'>
+                                <span class="lever"></span>
+                            </label></a>
+                    </div>
+                </li>
+                <!-- アカウントの削除 -->
+                <li class="collection-item" onclick="deleteLocalStorage()">インスタンス名、アクセストークンを削除する</li>
+                <!-- 起動したらすぐに読み込む -->
+                <li class="collection-item">
+                    <div class="switch">
+                        起動したらすぐに読み込む
+                        <a href="#!" class="secondary-content"><label>
+                                <input type="checkbox" id="start_load" onclick='setCheckBox("start_load","start_load")'>
+                                <span class="lever"></span>
+                            </label></a>
+                    </div>
+                </li>
+                <!-- すぐにストリーミングAPI（リアルタイム更新）を利用する -->
+                <li class="collection-item">
+                    <div class="switch">
+                        起動したらすぐに読み込むときにストリーミングAPIを利用する
+                        <a href="#!" class="secondary-content"><label>
+                                <input type="checkbox" id="start_load_streaming"
+                                    onclick='setCheckBox("start_load_streaming","start_load_streaming")'>
+                                <span class="lever"></span>
+                            </label></a>
+                    </div>
+                </li>
+
+            </div>
+            </li>
+    </div>
+    </ul>
+    </div>
+
+
+
+
+    <!-- 設定の適用 -->
+    <script>
+        if (localStorage.getItem("textbox_disable") == 1) {
+            document.getElementById("instance_textbox_disable").checked = true;
+        } else {
+            document.getElementById("instance_textbox_disable").checked = false;
+        }
+        if (localStorage.getItem("start_load") == 1) {
+            document.getElementById("start_load").checked = true;
+        } else {
+            document.getElementById("start_load").checked = false;
+        }
+        if (localStorage.getItem("start_load_streaming") == 1) {
+            document.getElementById("start_load_streaming").checked = true;
+        } else {
+            document.getElementById("start_load_streaming").checked = false;
+        }
+
+    </script>
+
+</body>
+
+<!-- JS -->
+<script>
+
+    //チェックボックス
+    function setCheckBox(id, name) {
+        //チェックされているか
+        if (document.getElementById(id).checked) {
+            localStorage.setItem(name, 1);
+        } else {
+            localStorage.setItem(name, 0);
+        }
+    }
+
+    //チェックされているか
+    function isCheck(id, name) {
+        if (localStorage.getItem(name) == 1) {
+            document.getElementById(id).checked = true;
+        } else {
+            document.getElementById(id).checked = false;
+        }
+    }
+
+    //localStorage削除
+    function deleteLocalStorage() {
+        var dialog = window.confirm('本当に削除しますか？');
+        if (dialog == true) {
+            localStorage.removeItem("instance");
+            localStorage.removeItem("access_token");
+        }
+    }
+</script>
+
+</html>
