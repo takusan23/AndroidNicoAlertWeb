@@ -241,7 +241,7 @@
                 //HTML動的生成？
                 document.getElementById("notification_list").innerHTML = '<li class="collection - item">' + content + created_at + '</li>' + addText;
                 //通知が利用できたら通知を出す
-                notification_api(content);
+                notification_api(content.replace(/<("[^"]*"|'[^']*'|[^'">])*>/g, ''));
             }
             //max_id
             //追加読み込み
