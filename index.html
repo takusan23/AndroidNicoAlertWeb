@@ -210,8 +210,8 @@
             //Content
             var content = payload.last_status.content;
             //時間計算をする
-            var date = new Date(object.created_at);
-            var created_at = date.getFullYear() + "年" + (date.getMonth() + 1) + "月" + date.getDate() + "日" + " " + date.getHours() + "時" + date.getMinutes() + "分" + date.getSeconds() + "秒";
+            var date = new Date(payload.last_status.created_at);
+            var created_at = date.getFullYear() + "年" + (date.getMonth() + 1) + "月" + date.getDate() + "日" + " " + date.getHours() + "時" + date.getMinutes() + "分" + date.getSeconds() + "秒" + "(" + payload.last_status.created_at + ")";
 
             //HTML 入れる
             //今までの内容を持ってくる
