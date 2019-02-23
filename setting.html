@@ -30,8 +30,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
 
     <!-- Switch -->
-    <div class="center">設定</div>
     <br>
+    <div class="center">設定</div>
 
     <!-- 設定項目 -->
     <div class="center-block" style="width: 90%;height: auto;">
@@ -48,14 +48,25 @@
                             </label></a>
                     </div>
                 </li>
+                <!-- 通知でもお知らせする -->
+                <li class="collection-item">
+                    <div class="switch">
+                        通知でもお知らせする（ストリーミングAPI利用時のみ有効）
+                        <a href="#!" class="secondary-content"><label>
+                                <input type="checkbox" id="notification_api"
+                                    onclick='setCheckBox("notification_api","notification_api")'>
+                                <span class="lever"></span>
+                            </label></a>
+                    </div>
+                </li>
 
                 <!-- アクセストークンのTextBox消す？ -->
                 <li class="collection-item">
                     <div class="switch">
                         インスタンス名、アクセストークンの欄を消す
                         <a href="#!" class="secondary-content"><label>
-                                <input type="checkbox" id="instance_textbox_disable"
-                                    onclick='setCheckBox("instance_textbox_disable","textbox_disable")'>
+                                <input type="checkbox" id="textbox_disable"
+                                    onclick='setCheckBox("textbox_disable","textbox_disable")'>
                                 <span class="lever"></span>
                             </label></a>
                     </div>
@@ -90,28 +101,26 @@
     </ul>
     </div>
 
-
+    <!-- 戻るボタン -->
+    <div class="fixed-action-btn">
+        <a class="btn-floating btn-large">
+            <i class="large material-icons" onclick="window.history.back();">home</i>
+        </a>
+    </div>
 
 
     <!-- 設定の適用 -->
     <script>
-        if (localStorage.getItem("textbox_disable") == 1) {
-            document.getElementById("instance_textbox_disable").checked = true;
-        } else {
-            document.getElementById("instance_textbox_disable").checked = false;
-        }
-        if (localStorage.getItem("start_load") == 1) {
-            document.getElementById("start_load").checked = true;
-        } else {
-            document.getElementById("start_load").checked = false;
-        }
-        if (localStorage.getItem("start_load_streaming") == 1) {
-            document.getElementById("start_load_streaming").checked = true;
-        } else {
-            document.getElementById("start_load_streaming").checked = false;
-        }
-
+        window.onload = function () {
+            //チェック入れる
+            isCheck("textbox_disable", "textbox_disable");
+            isCheck("start_load", "start_load");
+            isCheck("start_load_streaming", "start_load_streaming");
+            isCheck("title_disable", "title_disable");
+            isCheck("notification_api", "notification_api");
+        };
     </script>
+
 
 </body>
 
@@ -145,6 +154,8 @@
             localStorage.removeItem("access_token");
         }
     }
+
+
 </script>
 
 </html>

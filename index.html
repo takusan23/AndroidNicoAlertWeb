@@ -45,21 +45,6 @@
 
     </script>
 
-    <!-- Notifications API 許可をもらう -->
-    <script>
-        // ブラウザが通知をサポートしているか確認する
-        if (!('Notification' in window)) {
-            alert('未対応のブラウザです');
-        }
-        else {
-            // 許可を求める
-            Notification.requestPermission(function (result) {
-            })
-        }
-    </script>
-
-
-
     <p class="center" id="title_text">AndroidNicoAlert WebClient</p>
 
     <!-- 横並べ -->
@@ -103,6 +88,19 @@
     <!-- サイトが読み込まれたときに動く -->
     <script>
         window.onload = function () {
+            // 通知でもお知らせする
+            if (localStorage.getItem('notification_api') == 1) {
+                // ブラウザが通知をサポートしているか確認する
+                if (!('Notification' in window)) {
+                    alert('未対応のブラウザです');
+                }
+                else {
+                    // 許可を求める
+                    Notification.requestPermission(function (result) {
+                    })
+                }
+            }
+
             // TextBoxを消す
             if (localStorage.getItem('textbox_disable') == 1) {
                 document.getElementById('div_textbox').innerHTML = "";
@@ -265,9 +263,11 @@
                 //ついでに「AndroidNicoAlert」のぶんも消す（通知のtitleにもう書いてある）
                 var content_notification = content_noHtml.replace("AndroidNicoAlert / ", "");
                 //通知出す
-                new Notification("AndroidNicoAlert", {
-                    body: content_noHtml,
-                });
+                if (localStorage.getItem('notification_api') == 1) {
+                    new Notification("AndroidNicoAlert", {
+                        body: content_noHtml,
+                    });
+                }
             }
             //max_id
             //追加読み込み
