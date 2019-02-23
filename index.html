@@ -3,8 +3,7 @@
 
 <head>
     <!-- HTML アイコンせってい -->
-    <link rel="shortcut icon"
-        href="https://takusan23.github.io/AndroidNicoAlertWeb/android_nico_alert_icon.png">
+    <link rel="shortcut icon" href="https://takusan23.github.io/AndroidNicoAlertWeb/android_nico_alert_icon.png">
 
     <!-- iPhone Statusber Color -->
     <meta name="apple-mobile-web-app-status-bar-style" content="white">
@@ -67,10 +66,10 @@
     </div>
     <div class="center-block" style="width: 90%; display: flex;height: auto; ">
         <!-- ボタン -->
-        <a class="waves-effect waves-light btn" style="width: 50%;" id="login_button" onclick="login()"><i
+        <a class="waves-effect waves-light btn" style="width: 50%;" id="login_button" onclick="login(null)"><i
                 class="material-icons left">refresh</i>読み込み</a>
-        <a class="waves-effect waves-light btn" style="width: 50%;" id="delete_button" onclick="deleteLocalStorage()"><i
-                class="material-icons left">flash_on</i>ストリーミングAPIを利用</a>
+        <a class="waves-effect waves-light btn" style="width: 50%;" id="streaming_api_button"
+            onclick="streaming_api_menu()"><i class="material-icons left">flash_on</i>リアルタイム更新を利用</a>
         <a class="waves-effect waves-light btn" style="width: 50%;" id="delete_button" onclick="deleteLocalStorage()"><i
                 class="material-icons left">delete</i>ログイン情報を消去</a>
     </div>
@@ -93,8 +92,15 @@
 
 <!-- JSだあああああああああああああああああああああ -->
 <script language="javascript" type="text/javascript">
+    //接続・切断を判断できるように
+    var websoket = null;
+    var connect = false;
+    //追加読み込みカウンター
+    var add_load = false;
+
     // ログイン
-    function login() {
+    // DM読み込み
+    function login(max_id) {
         //通知リストを消去
         document.getElementById("notification_list").innerHTML = "";
         //localStorageに保存しているか確認
@@ -114,7 +120,12 @@
             access_token = localStorage.getItem('access_token');
         }
         const request = new XMLHttpRequest();
-        request.open("GET", "https://" + instance + "/api/v1/timelines/direct?limit=40&access_token=" + access_token);
+        //追加読み込みのときは max_id に入れる。そうじゃないときは null を入れる
+        var url = "https://" + instance + "/api/v1/timelines/direct?limit=40&access_token=" + access_token;
+        if (max_id != null) {
+            url = url + "&max_id" + max_id;
+        }
+        request.open("GET", url);
         // コールバック
         request.addEventListener("load", (event) => {
             //200
@@ -127,12 +138,16 @@
                     var object = array[i];
                     //今までの内容を持ってくる
                     var addText = document.getElementById("notification_list").innerHTML;
+
+                    //時間計算をする
+                    var date = new Date(object.created_at);
+                    var created_at = date.getFullYear() + "年" + (date.getMonth() + 1) + "月" + date.getDate() + "日" + " " + date.getHours() + "時" + date.getMinutes() + "分" + date.getSeconds() + "秒";
+
                     //AndroidNicoAlrt contentを入れる
                     //その他の返信を無視する（Applicationで分けようと思ったけどインスタンス違うとnullになる）
                     if (object.content.indexOf('AndroidNicoAlert') != -1) {
                         //HTML動的生成？
-                        document.getElementById("notification_list").innerHTML = addText + '<li class="collection - item">' + object.content + '</li>';
-
+                        document.getElementById("notification_list").innerHTML = addText + '<li class="collection - item">' + object.content + created_at + '</li>';
                     }
                 }
             } else {
@@ -148,10 +163,99 @@
         localStorage.removeItem("access_token");
     }
 
+    //WebSocketでストリーミングAPI利用
+    function streaming_api() {
+        //通知リストを消去
+        document.getElementById("notification_list").innerHTML = "";
+        //localStorageに保存しているか確認
+        //してなかったらテキストボックスから持ってくる
+        var instance = "null";
+        var access_token = "null";
+        if (localStorage.getItem('instance') == null && localStorage.getItem('access_token') == null) {
+            //インスタンスとアクセストークン持ってくる
+            instance = document.getElementById("instance_text").value;
+            access_token = document.getElementById("access_token_text").value;
+            //localStorageにそれぞれ保存
+            localStorage.setItem('instance', instance);
+            localStorage.setItem('access_token', access_token);
+        } else {
+            //localStorageから取り出す
+            instance = localStorage.getItem('instance');
+            access_token = localStorage.getItem('access_token');
+        }
+
+        //StreamingAPI DM
+        var url = "wss://" + instance + "/api/v1/streaming?access_token=" + access_token + "&stream=direct";
+        //WebSocket
+        websoket = new WebSocket(url);
+
+        //接続した
+        //通信が接続された場合
+        websoket.onopen = function (e) {
+            //接続中
+            document.getElementById("streaming_api_button").innerHTML = '<i class="material-icons left">flash_on</i>リアルタイム更新を利用中</a>';
+        };
+
+        //エラーが発生した場合
+        websoket.onerror = function (error) {
+            alert("エラーが発生しました。");
+        };
+
+        //メッセージを受け取った場合
+        websoket.onmessage = function (e) {
+            //console.log(e.data)
+            //JSON Parse
+            object = JSON.parse(e.data);
+            payload = JSON.parse(object.payload);
+            //Content
+            var content = payload.last_status.content;
+            //時間計算をする
+            var date = new Date(object.created_at);
+            var created_at = date.getFullYear() + "年" + (date.getMonth() + 1) + "月" + date.getDate() + "日" + " " + date.getHours() + "時" + date.getMinutes() + "分" + date.getSeconds() + "秒";
+
+            //HTML 入れる
+            //今までの内容を持ってくる
+            var addText = document.getElementById("notification_list").innerHTML;
+            //AndroidNicoAlrt contentを入れる
+            //その他の返信を無視する（Applicationで分けようと思ったけどインスタンス違うとnullになる）
+            if (content.indexOf('AndroidNicoAlert') != -1) {
+                //HTML動的生成？
+                document.getElementById("notification_list").innerHTML = '<li class="collection - item">' + content + created_at + '</li>' + addText;
+            }
+            //max_id
+            //追加読み込み
+            if (add_load == false) {
+                var max_id = payload.id;
+                login(max_id);
+                add_load = true;
+            }
+        };
+
+        //通信が切断された場合
+        websoket.onclose = function () {
+            alert("通信が切断されました。");
+            document.getElementById("streaming_api_button").innerHTML = '<i class="material-icons left">flash_on</i>リアルタイム更新を利用</a>';
+        };
+    }
+
     //Enter Key
     function enterLogin() {
         if (window.event.keyCode == 13) {
             login();
+        }
+    }
+
+    //ストリーミングAPIに接続、切断
+    function streaming_api_menu() {
+        if (connect == true) {
+            websoket.close();
+            alert("ストリーミングAPI（リアルタイム更新）を終了しました。");
+            connect = false;
+        } else {
+            streaming_api();
+            alert("ストリーミングAPI（リアルタイム更新）を開始しました。");
+            connect = true;
+
         }
     }
 
